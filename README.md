@@ -1,1 +1,1 @@
-# Character-Level-Convolutional-Neural-Network-For-Hate-Speech-Detection
+# Character-level Convolutional Neural Network for Hate Speech Detection
