@@ -78,7 +78,7 @@ fabric.properties
 **/.idea/
 *.iml
 modules.xml
-workspace.xml
+.idea/workspace.xml
 .idea/misc.xml
 .idea/vcs.xml
 *.ipr
