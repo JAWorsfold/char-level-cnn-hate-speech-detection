@@ -34,9 +34,9 @@ test_three = ['1,0\n',
 
 
 def test_read_tweet_ids():
-    result_one = read_tweet_ids('test\test_data_one.txt')
-    result_two = read_tweet_ids('test\test_data_two.txt')
-    result_three = read_tweet_ids('test\test_data_three.txt')
+    result_one = read_tweet_ids('test/test_data_one.txt')
+    result_two = read_tweet_ids('test/test_data_two.txt')
+    result_three = read_tweet_ids('test/test_data_three.txt')
     assert result_one == test_one
     assert result_two == test_two
     assert result_three == test_three

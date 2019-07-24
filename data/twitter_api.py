@@ -16,9 +16,10 @@ TWEETS_PER_REQUEST = 100
 
 
 def read_tweet_ids(filepath):
-    """to do"""
-
-    return []
+    """Read the contents of a file provided as a parameter and return an array of line contents."""
+    with open(filepath) as twitter_data:
+        lines = twitter_data.readlines()
+    return lines
 
 
 def get_tweet_statuses(array_of_tweet_ids, batchsize):
@@ -33,6 +34,7 @@ def write_tweet_status(filepath, array_of_tweet_statuses):
 
 def main():
     """Handle the bulk of the execution"""
+    print(read_tweet_ids('test/test_data_one.txt'))
     return
 
 
