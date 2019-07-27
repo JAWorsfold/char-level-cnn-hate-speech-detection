@@ -1,4 +1,4 @@
-**waseem_labaled_id_data.csv** - this data set was accessed via the repository belonging to  Zhang, Z et al. which can be found
+**waseem_labaled_id_data.csv** - this data set was accessed via the repository belonging to  Zhang, Z. et al. which can be found
 [here.](https://github.com/ziqizhang/chase/tree/master/data/ml/public/w%2Bws)
 
 The labels can be identified as such: 
@@ -7,10 +7,10 @@ The labels can be identified as such:
 2 - neither, 
 3 - both` 
 
-This data set is composed of two distinct data sets which have been merged together by Zhang, Z et al.. 
-The two original data sets were created by Waseem, Z et al..
+This data set is composed of two distinct data sets which have been merged together by Zhang, Z. et al.. 
+The two original data sets were created by Waseem, Z. et al..
 
-If you wish to use this data set please cite the paper by Zhang, Z et al.:
+If you wish to use this data set please cite the paper by Zhang, Z. et al.:
 
 ~~~
 @inproceedings{zhang2018detecting,
@@ -23,7 +23,7 @@ If you wish to use this data set please cite the paper by Zhang, Z et al.:
 }
 ~~~
 
-and cite both of the papers by Waseem, Z et al.:
+and cite both of the papers by Waseem, Z. et al.:
 
 ~~~
 @InProceedings{waseem-hovy:2016:N16-2,
