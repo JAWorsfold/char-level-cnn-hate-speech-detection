@@ -17,28 +17,27 @@ test_two = ['234123513245,0\n',
             '657456793278,1\n']
 
 test_real_id = ['896523232098078720,0\n',
-                '896523304873238528,0\n',
                 '796394920051441664,0\n']
 
-test_real_result = ['896523232098078720,"No one is born hating another person because of the color of his skin or his background or his religion...",0\n',
-                    '896523304873238528,Thank you for everything. My last ask is the same as my first. I\'m asking you to believe—not in my ability to create change, but in yours.,0\n',
-                    '796394920051441664,"To all the little girls watching...never doubt that you are valuable and powerful & deserving of every chance & opportunity in the world.",0\n']
+test_real_result = ['896523232098078720,\"\"\"No one is born hating another person because of the color of his skin or his background or his religion...\"\" https://t.co/InZ58zkoAm\",0\n',
+                    '796394920051441664,\"\"\"To all the little girls watching...never doubt that you are valuable and powerful &amp; deserving of every chance &amp; opportunity in the world.\"\"\",0\n']
 
 def test_read_tweet_ids():
-    result_one = read_tweet_ids('test/test_data_one.txt')
-    result_two = read_tweet_ids('test/test_data_two.txt')
-    # will be used to test real tweets
-    # result_three = read_tweet_ids('test/test_data_real.txt')
+    result_one = read_tweet_ids('test/test_data_one.csv')
+    result_two = read_tweet_ids('test/test_data_two.csv')
+    result_three = read_tweet_ids('test/test_data_real.csv')
     assert result_one == test_one
     assert result_two == test_two
-    #assert result_three == test_three
+    assert result_three == test_real_id
 
 
 def test_get_tweet_status():
     api = initialize_twitter_api()
     for i in range(len(test_real_id)):
         status_object = get_tweet_status(test_real_id[i].split(',')[0], api)
-        assert status_object.full_text == test_real_result[i].split(',')[1]
+        actual_string = string_to_csv(status_object.full_text)
+        expected_string = test_real_result[i].split(',')[1]
+        assert actual_string == expected_string
 
 
 def test_string_to_csv():
@@ -60,13 +59,13 @@ def test_string_to_csv():
 
 
 def test_write_tweet_status():
-    write_tweet_status('test/test_write_one.txt',test_one)
-    write_tweet_status('test/test_write_two.txt',test_two)
+    write_tweet_status('test/test_write_one.csv',test_one)
+    write_tweet_status('test/test_write_two.csv',test_two)
     #write_tweet_status(test_three)
 
-    with open('test/test_write_one.txt') as test_file:
+    with open('test/test_write_one.csv') as test_file:
         test_file_one = test_file.readlines()
-    with open('test/test_write_two.txt') as test_file:
+    with open('test/test_write_two.csv') as test_file:
         test_file_two = test_file.readlines()
 
     assert test_file_one == test_one
@@ -74,8 +73,8 @@ def test_write_tweet_status():
 
 
 def test_get_tweets():
-    input_file = 'test/test_data_real.txt'
-    output_file = 'test/test_write_real.txt'
-    get_tweet_status(input_file, output_file)
+    input_file = 'test/test_data_real.csv'
+    output_file = 'test/test_write_real.csv'
+    get_tweets(input_file, output_file)
     output_read_array = read_tweet_ids(output_file)
     assert output_read_array == test_real_result
