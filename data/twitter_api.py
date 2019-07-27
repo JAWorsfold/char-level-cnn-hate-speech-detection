@@ -23,7 +23,7 @@ def read_tweet_ids(filepath):
     return lines
 
 
-def get_tweet_statuses(array_of_tweet_ids, batchsize):
+def get_tweet_statuses(array_of_tweet_ids, api):
     """to do"""
     return []
 
@@ -37,20 +37,24 @@ def write_tweet_status(filepath, array_of_tweet_statuses):
 
 def main():
     """Handle the bulk of the execution"""
-    sub_tweet_ids_only = []
-    all_tweet_statuses = []
+    sub_tweet_ids_only = [] #empty array to store tweet ids
+    all_tweet_statuses = [] #empty array to store all complete lines
+
+    oauth = tweepy.OAuthHandler(CONSUMER_API_KEY, CONSUMER_API_SECRET)
+    oauth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
+    api = tweepy.API(oauth)
 
     all_tweet_ids = read_tweet_ids('data/public/waseem_labeled_id_data.csv')
 
     while all_tweet_ids:
-        sub_tweet_ids = all_tweet_ids[:TWEET_BATCH_SIZE - 1]
-        all_tweet_ids = all_tweet_ids[TWEET_BATCH_SIZE - 1:]
+        sub_tweet_ids = all_tweet_ids[:TWEETS_PER_REQUEST - 1]
+        all_tweet_ids = all_tweet_ids[TWEETS_PER_REQUEST - 1:]
         for line in sub_tweet_ids:
             id_only = line.split(',')[0]
             sub_tweet_ids_only.append(id_only)
 
         # now need to concat the status onto the original id+val line
-        sub_tweet_statuses = tweet_status(api, sub_tweet_ids_only)
+        sub_tweet_statuses = get_tweet_statuses(sub_tweet_ids_only, api)
         for i in range(0, len(sub_tweet_statuses)):
             old_line = sub_tweet_ids[i].split(',')
             new_line = old_line[0] + ',' + sub_tweet_statuses[i] + ',' + old_line[1]
