@@ -23,9 +23,16 @@ def read_tweet_ids(filepath):
     return lines
 
 
+def get_tweet_status(tweet_id, api):
+    """Invoke twitter api using 'tweepy' and return a single of status object based on id"""
+    tweet_status = api.get_status(tweet_id)
+    return tweet_status
+
+
 def get_tweet_statuses(array_of_tweet_ids, api):
-    """to do"""
-    return []
+    """Invoke twitter api using 'tweepy' and return a list of status objects"""
+    tweet_statuses = api.statuses_lookup(id_=array_of_tweet_ids, include_entities=False, trim_user=True)
+    return tweet_statuses
 
 
 def write_tweet_status(filepath, array_of_tweet_statuses):
@@ -35,15 +42,40 @@ def write_tweet_status(filepath, array_of_tweet_statuses):
             twitter_status_data.write(line)
 
 
-def main():
-    """Handle the bulk of the execution"""
-    sub_tweet_ids_only = [] #empty array to store tweet ids
-    all_tweet_statuses = [] #empty array to store all complete lines
-
+def initialize_twitter_api():
     oauth = tweepy.OAuthHandler(CONSUMER_API_KEY, CONSUMER_API_SECRET)
     oauth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(oauth)
+    return api
 
+
+def get_tweets():
+    """Retrieve tweet statuses one at a time and then write them to a file"""
+    sub_tweet_ids_only = [] #empty array to store tweet ids
+    all_tweet_statuses = [] #empty array to store all complete lines
+
+    twitter_api = initialize_twitter_api()
+    all_tweet_ids = read_tweet_ids('data/public/waseem_labeled_id_data.csv')
+
+    for tweet_id in all_tweet_ids:
+        old_line = tweet_id.split(',')
+        print(old_line)
+        tweet_status = get_tweet_status(old_line[0], twitter_api)
+        print(str(tweet_status.id) + ': ' + tweet_status.text)
+        if old_line[0] == str(tweet_status.id):
+            new_line = old_line[0] + ',' + tweet_status.text + ',' + old_line[1]
+            print(new_line)
+        break
+        #if tweet_id == str(tweet_status.id):
+        #    new_line =
+
+
+def get_tweets_bulk():
+    """Retrieve tweet statuses in bulk and then write them to a file"""
+    sub_tweet_ids_only = [] #empty array to store tweet ids
+    all_tweet_statuses = [] #empty array to store all complete lines
+
+    twitter_api = initialize_twitter_api()
     all_tweet_ids = read_tweet_ids('data/public/waseem_labeled_id_data.csv')
 
     while all_tweet_ids:
@@ -53,12 +85,16 @@ def main():
             id_only = line.split(',')[0]
             sub_tweet_ids_only.append(id_only)
 
-        # now need to concat the status onto the original id+val line
-        sub_tweet_statuses = get_tweet_statuses(sub_tweet_ids_only, api)
+        sub_tweet_statuses = get_tweet_statuses(sub_tweet_ids_only, twitter_api)
+
+        #now need to concat the status onto the original id+val line
         for i in range(0, len(sub_tweet_statuses)):
             old_line = sub_tweet_ids[i].split(',')
-            new_line = old_line[0] + ',' + sub_tweet_statuses[i] + ',' + old_line[1]
-            all_tweet_statuses.append(new_line)
+            if old_line[0] == sub_tweet_statuses[i].id:
+                new_line = old_line[0] + ',' + sub_tweet_statuses[i].text + ',' + old_line[1]
+                all_tweet_statuses.append(new_line)
+
+        sub_tweet_ids_only.clear()
 
     write_tweet_status('data/private/waseem_labeled_status_data.csv', all_tweet_statuses)
 
@@ -66,4 +102,6 @@ def main():
 if __name__ == '__main__':
     #test_pd_file = pd.read_csv('data/private/davidson_labeled_status_data.csv', nrows=15)
     #print(test_pd_file)
-    main()
+
+    get_tweets()
+    #get_tweets_bulk()
