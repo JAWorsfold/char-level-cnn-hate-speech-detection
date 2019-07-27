@@ -36,6 +36,7 @@ def get_tweet_statuses(array_of_tweet_ids, api):
 
 
 def string_to_csv(string):
+    """Convert normal string to a csv compatible string."""
     result = string
     if "\"" in result:
         result = result.replace("\"", "\"\"")
@@ -55,6 +56,7 @@ def write_tweet_status(filepath, array_of_tweet_statuses):
 
 
 def initialize_twitter_api():
+    """Initialize twitter api using global variables for OAuth access."""
     oauth = tweepy.OAuthHandler(CONSUMER_API_KEY, CONSUMER_API_SECRET)
     oauth.set_access_token(ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     api = tweepy.API(oauth)
@@ -77,7 +79,7 @@ def get_tweets(input_file, output_file):
             tweet_status = get_tweet_status(old_line[0], twitter_api)
             try:
                 retweet_status = tweet_status._json["retweeted_status"]
-            except:
+            except Exception:
                 pass
             if old_line[0] == str(tweet_status.id):
                 if retweet_status is None:
@@ -88,7 +90,7 @@ def get_tweets(input_file, output_file):
                 new_line = old_line[0] + ',' + csv_status + ',' + old_line[1]
                 print(str(count) + ', ' + new_line)
                 all_tweet_statuses.append(new_line)
-        except:  # not certain what the exact exceptions are for tweepy
+        except Exception:  # not certain what the exact exceptions are for tweepy
             print(str(count) + ', ' + 'Tweet not available for tweet: ' + tweet_id)
 
         count += 1
