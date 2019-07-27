@@ -25,7 +25,7 @@ def read_tweet_ids(filepath):
 
 def get_tweet_status(tweet_id, api):
     """Invoke twitter api using 'tweepy' and return a single of status object based on id"""
-    tweet_status = api.get_status(tweet_id)
+    tweet_status = api.get_status(tweet_id, tweet_mode='extended')
     return tweet_status
 
 
@@ -33,6 +33,15 @@ def get_tweet_statuses(array_of_tweet_ids, api):
     """Invoke twitter api using 'tweepy' and return a list of status objects"""
     tweet_statuses = api.statuses_lookup(id_=array_of_tweet_ids, include_entities=False, trim_user=True)
     return tweet_statuses
+
+
+def string_to_csv(string):
+    result = string
+    if "\"" in result:
+        result = result.replace("\"", "\"\"")
+    if "," in result or "\n" in result or "\"" in result:
+        result = "\"" + result + "\""
+    return result
 
 
 def write_tweet_status(filepath, array_of_tweet_statuses):
@@ -65,12 +74,9 @@ def get_tweets():
         except:  # not certain what the exact exceptions are for tweepy
             print(str(count) + ', ' + 'Tweet not available for tweet: ' + tweet_id)
         if old_line[0] == str(tweet_status.id):
-            status = str(tweet_status.text.encode('UTF-8').decode('UTF-8'))
-            if "\"" in status:
-                status.replace("\"", "\"\"")
-            if "," in status or "\n" in status or "\"" in status:
-                status = "\"" + status + "\""
-            new_line = old_line[0] + ',' + status + ',' + old_line[1]
+            status = str(tweet_status.full_text.encode('UTF-8').decode('UTF-8'))
+            csv_status =  string_to_csv(status)
+            new_line = old_line[0] + ',' + csv_status + ',' + old_line[1]
             print(str(count) + ', ' + new_line)
             all_tweet_statuses.append(new_line)
 
