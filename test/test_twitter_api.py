@@ -16,9 +16,13 @@ test_two = ['234123513245,0\n',
             '564918597520,1\n',
             '657456793278,1\n']
 
-test_real = ['896523232098078720,"No one is born hating another person because of the color of his skin or his background or his religion...",0\n',
-             '896523304873238528,Thank you for everything. My last ask is the same as my first. I\'m asking you to believe—not in my ability to create change, but in yours.,0\n',
-             '796394920051441664,"To all the little girls watching...never doubt that you are valuable and powerful & deserving of every chance & opportunity in the world.",0\n']
+test_real_id = ['896523232098078720,0\n',
+                '896523304873238528,0\n',
+                '796394920051441664,0\n']
+
+test_real_result = ['896523232098078720,"No one is born hating another person because of the color of his skin or his background or his religion...",0\n',
+                    '896523304873238528,Thank you for everything. My last ask is the same as my first. I\'m asking you to believe—not in my ability to create change, but in yours.,0\n',
+                    '796394920051441664,"To all the little girls watching...never doubt that you are valuable and powerful & deserving of every chance & opportunity in the world.",0\n']
 
 def test_read_tweet_ids():
     result_one = read_tweet_ids('test/test_data_one.txt')
@@ -31,7 +35,10 @@ def test_read_tweet_ids():
 
 
 def test_get_tweet_status():
-    assert True
+    api = initialize_twitter_api()
+    for i in range(len(test_real_id)):
+        status_object = get_tweet_status(test_real_id[i].split(',')[0], api)
+        assert status_object.full_text == test_real_result[i].split(',')[1]
 
 
 def test_string_to_csv():
@@ -67,4 +74,8 @@ def test_write_tweet_status():
 
 
 def test_get_tweets():
-    assert True
+    input_file = 'test/test_data_real.txt'
+    output_file = 'test/test_write_real.txt'
+    get_tweet_status(input_file, output_file)
+    output_read_array = read_tweet_ids(output_file)
+    assert output_read_array == test_real_result
