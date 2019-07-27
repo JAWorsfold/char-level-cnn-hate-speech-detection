@@ -51,7 +51,7 @@ def write_tweet_status(filepath, array_of_tweet_statuses):
             try:
                 twitter_status_data.write(line)
             except UnicodeEncodeError:
-                print(line.split(',')[0])
+                print("UnicodeEncodeError on ID: " + line.split(',')[0])
 
 
 def initialize_twitter_api():
@@ -72,16 +72,24 @@ def get_tweets(input_file, output_file):
 
     for tweet_id in all_tweet_ids:
         old_line = tweet_id.split(',')
+        retweet_status = None
         try:
             tweet_status = get_tweet_status(old_line[0], twitter_api)
+            try:
+                retweet_status = tweet_status._json["retweeted_status"]
+            except:
+                pass
+            if old_line[0] == str(tweet_status.id):
+                if retweet_status is None:
+                    status = str(tweet_status.full_text)
+                else:
+                    status = str(tweet_status._json["retweeted_status"]["full_text"])
+                csv_status = string_to_csv(status)
+                new_line = old_line[0] + ',' + csv_status + ',' + old_line[1]
+                print(str(count) + ', ' + new_line)
+                all_tweet_statuses.append(new_line)
         except:  # not certain what the exact exceptions are for tweepy
             print(str(count) + ', ' + 'Tweet not available for tweet: ' + tweet_id)
-        if old_line[0] == str(tweet_status.id):
-            status = str(tweet_status.full_text)
-            csv_status =  string_to_csv(status)
-            new_line = old_line[0] + ',' + csv_status + ',' + old_line[1]
-            print(str(count) + ', ' + new_line)
-            all_tweet_statuses.append(new_line)
 
         count += 1
 
@@ -125,5 +133,5 @@ if __name__ == '__main__':
     #test_pd_file = pd.read_csv('data/private/davidson_labeled_status_data.csv', nrows=15)
     #print(test_pd_file)
 
-    get_tweets(input_file='data/public/waseem_labeled_id_data.csv', output_file='data/private/waseem_labeled_status_data.csv')
-    #get_tweets_bulk()
+    get_tweets(input_file='data/public/waseem_labeled_id_data.csv',
+               output_file='data/private/waseem_labeled_status_data.csv')
