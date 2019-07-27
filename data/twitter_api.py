@@ -48,7 +48,10 @@ def write_tweet_status(filepath, array_of_tweet_statuses):
     """Given an array and filepath/ destination, create the file and write the array lines to the file."""
     with open(filepath, 'w') as twitter_status_data:
         for line in array_of_tweet_statuses:
-            twitter_status_data.write(line)
+            try:
+                twitter_status_data.write(line)
+            except UnicodeEncodeError:
+                print(line.split(',')[0])
 
 
 def initialize_twitter_api():
@@ -58,12 +61,12 @@ def initialize_twitter_api():
     return api
 
 
-def get_tweets():
+def get_tweets(input_file, output_file):
     """Retrieve tweet statuses one at a time and then write them to a file"""
     all_tweet_statuses = []  # empty array to store all complete lines
 
     twitter_api = initialize_twitter_api()
-    all_tweet_ids = read_tweet_ids('data/public/waseem_labeled_id_data.csv')
+    all_tweet_ids = read_tweet_ids(input_file)
 
     count = 1
 
@@ -74,7 +77,7 @@ def get_tweets():
         except:  # not certain what the exact exceptions are for tweepy
             print(str(count) + ', ' + 'Tweet not available for tweet: ' + tweet_id)
         if old_line[0] == str(tweet_status.id):
-            status = str(tweet_status.full_text.encode('UTF-8').decode('UTF-8'))
+            status = str(tweet_status.full_text)
             csv_status =  string_to_csv(status)
             new_line = old_line[0] + ',' + csv_status + ',' + old_line[1]
             print(str(count) + ', ' + new_line)
@@ -82,7 +85,7 @@ def get_tweets():
 
         count += 1
 
-    write_tweet_status('data/private/waseem_labeled_status_data.csv', all_tweet_statuses)
+    write_tweet_status(output_file, all_tweet_statuses)
 
 
 
@@ -122,5 +125,5 @@ if __name__ == '__main__':
     #test_pd_file = pd.read_csv('data/private/davidson_labeled_status_data.csv', nrows=15)
     #print(test_pd_file)
 
-    get_tweets()
+    get_tweets(input_file='data/public/waseem_labeled_id_data.csv', output_file='data/private/waseem_labeled_status_data.csv')
     #get_tweets_bulk()
