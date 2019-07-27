@@ -51,29 +51,42 @@ def initialize_twitter_api():
 
 def get_tweets():
     """Retrieve tweet statuses one at a time and then write them to a file"""
-    sub_tweet_ids_only = [] #empty array to store tweet ids
-    all_tweet_statuses = [] #empty array to store all complete lines
+    all_tweet_statuses = []  # empty array to store all complete lines
 
     twitter_api = initialize_twitter_api()
     all_tweet_ids = read_tweet_ids('data/public/waseem_labeled_id_data.csv')
 
+    count = 1
+
     for tweet_id in all_tweet_ids:
         old_line = tweet_id.split(',')
-        print(old_line)
-        tweet_status = get_tweet_status(old_line[0], twitter_api)
-        print(str(tweet_status.id) + ': ' + tweet_status.text)
+        try:
+            tweet_status = get_tweet_status(old_line[0], twitter_api)
+        except:  # not certain what the exact exceptions are for tweepy
+            print(str(count) + ', ' + 'Tweet not available for tweet: ' + tweet_id)
         if old_line[0] == str(tweet_status.id):
-            new_line = old_line[0] + ',' + tweet_status.text + ',' + old_line[1]
-            print(new_line)
-        break
-        #if tweet_id == str(tweet_status.id):
-        #    new_line =
+            status = str(tweet_status.text.encode('UTF-8').decode('UTF-8'))
+            if "\"" in status:
+                status.replace("\"", "\"\"")
+            if "," in status or "\n" in status or "\"" in status:
+                status = "\"" + status + "\""
+            new_line = old_line[0] + ',' + status + ',' + old_line[1]
+            print(str(count) + ', ' + new_line)
+            all_tweet_statuses.append(new_line)
+
+        count += 1
+
+    write_tweet_status('data/private/waseem_labeled_status_data.csv', all_tweet_statuses)
+
 
 
 def get_tweets_bulk():
-    """Retrieve tweet statuses in bulk and then write them to a file"""
-    sub_tweet_ids_only = [] #empty array to store tweet ids
-    all_tweet_statuses = [] #empty array to store all complete lines
+    """
+    Retrieve tweet statuses in bulk and then write them to a file
+    !!!To be completed!!!
+    """
+    sub_tweet_ids_only = []  # empty array to store tweet ids
+    all_tweet_statuses = []  # empty array to store all complete lines
 
     twitter_api = initialize_twitter_api()
     all_tweet_ids = read_tweet_ids('data/public/waseem_labeled_id_data.csv')
