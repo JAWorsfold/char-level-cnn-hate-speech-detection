@@ -8,6 +8,7 @@ import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
+from sklearn.utils import resample
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plot
@@ -52,7 +53,6 @@ def run_model ():
     Decide whether to use over-sampling, under-sampling or SMOTE to deal with imbalance.
     Class split: 0=25863, 1=2285
     """
-
     data_frame = pd.read_csv("data/private/td_zw_labeled_data.csv")
     tweets = data_frame.tweet
 
@@ -65,15 +65,25 @@ def run_model ():
         tokenizer=svm_tokenizer,
         stop_words=svm_stop_words,
         ngram_range=(1, 3),
-        decode_error='replace'
+        decode_error='replace',
+        max_features=20000
     )
 
-    vectorizer.fit(tweets)
-    X = vectorizer.transform(tweets)
+    X = pd.DataFrame(vectorizer.fit_transform(tweets).toarray())
     y = data_frame['class'].astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.2)
 
-    for c in [0.25, 0.5, 1, 2.5, 5]:
+    # over sampling
+    X = pd.concat([X_train, y_train], axis=1)
+    not_hate = X[X['class']==0]
+    hate = X[X['class']==1]
+    hate_over_sampled = resample(hate, replace=True, n_samples=len(hate)*5, random_state=33)
+    X = pd.concat([not_hate, hate_over_sampled])
+    X_train = X.drop('class', axis=1)
+    y_train = X['class']
+
+
+    for c in [0.25, 0.5, 1, 1.5, 2, 2.5, 3]:
 
         svm = LinearSVC(C=c)
         svm.fit(X_train, y_train)
