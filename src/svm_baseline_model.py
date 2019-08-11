@@ -2,6 +2,7 @@
 his paper: TBC"""
 
 import re
+import string
 import numpy as np
 import pandas as pd
 import nltk
@@ -21,8 +22,12 @@ def svm_preprocessor(tweet):
     :param tweet: text string
     :return preprocessed_tweet: without mentions, URLs and extra whitespace
     """
-
-    preprocessed_tweet = None
+    re_mention = '@[\w\-]+'
+    re_url = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+    re_whitespace = '\s+'
+    preprocessed_tweet = re.sub(re_mention, '', tweet)
+    preprocessed_tweet = re.sub(re_url, '', preprocessed_tweet)
+    preprocessed_tweet = re.sub(re_whitespace, ' ', preprocessed_tweet)
     return preprocessed_tweet
 
 
@@ -33,7 +38,11 @@ def svm_tokenizer(tweet):
     :param tweet: a text string
     :return tokenized_tweet: all lowercase, no punctuation and stemmed
     """
-    tokenized_tweet = None
+    tweet_lower = tweet.lower()
+    no_punc = re.split('[^a-zA-Z ]*', tweet_lower)
+    stripped = ''.join(no_punc).strip()
+    stemmer = nltk.PorterStemmer()
+    tokenized_tweet = [stemmer.stem(w) for w in stripped.split()]
     return tokenized_tweet
 
 
@@ -57,9 +66,5 @@ def run_model ():
 
 if __name__ == '__main__':
     #run_model()
-    test_one = "\"No one is born hating another person because of the color of his skin or his background or his religion...\"   "
-    stemmer = nltk.PorterStemmer()
-    tokens = [stemmer.stem(t) for t in test_one.split()]
-    string_tokens = ' '.join(tokens)
-    print(tokens)
-    print(string_tokens)
+    test_one = ("TensorWatch: A debugging and visualization system for machine learning http://bit.ly/2KFUvqe   #AI   #DeepLearning   #MachineLearning  #DataScience")
+    print(svm_tokenizer(test_one))
