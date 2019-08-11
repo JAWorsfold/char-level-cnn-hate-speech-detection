@@ -1,6 +1,7 @@
 """This model is based partly on a similar model used by Thomas Davidson et al. in
 his paper: TBC"""
 
+import re
 import numpy as np
 import pandas as pd
 import nltk
@@ -11,21 +12,26 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
 
-def preprocessor(tweet):
+def svm_preprocessor(tweet):
+    """
+    Take a tweet - which is just a simple text string - and remove or replace:
+    1) Mentions i.e. @someone
+    2) URLs i.e. https://www.twitter.com
+    3) Repeated whitespace
+    :param tweet: text string
+    :return preprocessed_tweet: without mentions, URLs and extra whitespace
     """
 
-    :param tweet:
-    :return:
-    """
     preprocessed_tweet = None
     return preprocessed_tweet
 
 
-def tokenizer(tweet):
+def svm_tokenizer(tweet):
     """
-
-    :param tweet:
-    :return:
+    Take a tweet - a simple text string - and remove punctuation, set characters to
+    lowercase and stem the tweets.
+    :param tweet: a text string
+    :return tokenized_tweet: all lowercase, no punctuation and stemmed
     """
     tokenized_tweet = None
     return tokenized_tweet
@@ -50,4 +56,10 @@ def run_model ():
 
 
 if __name__ == '__main__':
-    run_model()
+    #run_model()
+    test_one = "\"No one is born hating another person because of the color of his skin or his background or his religion...\"   "
+    stemmer = nltk.PorterStemmer()
+    tokens = [stemmer.stem(t) for t in test_one.split()]
+    string_tokens = ' '.join(tokens)
+    print(tokens)
+    print(string_tokens)
