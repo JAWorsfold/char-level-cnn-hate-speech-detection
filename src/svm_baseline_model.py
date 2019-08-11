@@ -50,21 +50,36 @@ def run_model ():
     """
     Decide whether to use over-sampling, under-sampling or SMOTE to deal with imbalance.
     Class split: 0=25863, 1=2285
-    :return:
     """
 
+    data_frame = pd.read_csv("data/private/td_zw_labeled_data.csv")
+    tweets = data_frame.tweet
 
-    #I know I'm going to use a TfIdf Vectorizer so I'll build it here and write the functions after
+    svm_stop_words = nltk.corpus.stopwords.words('english')
+    other_words = ['rt']  # may add more later
+    svm_stop_words.extend(other_words)
     vectorizer = TfidfVectorizer(
-        preprocessor=preprocessor,
-        tokenizer=tokenizer,
-        stop_words=stopwords,
+        preprocessor=svm_preprocessor,
+        tokenizer=svm_tokenizer,
+        stop_words=svm_stop_words,
         ngram_range=(1, 3),
         decode_error='replace'
     )
 
+    vectorizer.fit(tweets)
+    X = vectorizer.transform(tweets)
+    y = data_frame['class'].astype(int)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.2)
+
+    for c in [0.25, 0.5, 1]:
+
+        svm = LinearSVC(C=c)
+        svm.fit(X_train, y_train)
+        y_pred = svm.predict(X_test)
+        results = classification_report(y_test, y_pred)
+        print(results)
+        print()
+
 
 if __name__ == '__main__':
-    #run_model()
-    test_one = ("TensorWatch: A debugging and visualization system for machine learning http://bit.ly/2KFUvqe   #AI   #DeepLearning   #MachineLearning  #DataScience")
-    print(svm_tokenizer(test_one))
+    run_model()
