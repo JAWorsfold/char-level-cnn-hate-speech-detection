@@ -2,15 +2,16 @@
 his paper: TBC"""
 
 import re
-import string
 import numpy as np
 import pandas as pd
 import nltk
-import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plot
+import seaborn as sns
 
 
 def svm_preprocessor(tweet):
@@ -58,6 +59,7 @@ def run_model ():
     svm_stop_words = nltk.corpus.stopwords.words('english')
     other_words = ['rt']  # may add more later
     svm_stop_words.extend(other_words)
+    svm_stop_words = svm_tokenizer(svm_preprocessor(' '.join(svm_stop_words)))
     vectorizer = TfidfVectorizer(
         preprocessor=svm_preprocessor,
         tokenizer=svm_tokenizer,
@@ -71,14 +73,25 @@ def run_model ():
     y = data_frame['class'].astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.2)
 
-    for c in [0.25, 0.5, 1]:
+    for c in [0.25, 0.5, 1, 2.5, 5]:
 
         svm = LinearSVC(C=c)
         svm.fit(X_train, y_train)
         y_pred = svm.predict(X_test)
         results = classification_report(y_test, y_pred)
+        print('####################### C=' + str(c) + ' #######################')
         print(results)
         print()
+
+        conf_matrix = confusion_matrix(y_test, y_pred)
+        print(conf_matrix)
+        # names = ['Non-hate', 'Hate']
+        # df_cm = pd.DataFrame(conf_matrix, index=names, columns=names)
+        # plot.figure(figsize=(6,6))
+        # sns.heatmap(conf_matrix, annot=True, annot_kws={"size": 12}, cmap='gist_gray_r', square=True, fmt='.2f')
+        # plot.ylabel('Actual Class', fontsize=12)
+        # plot.xlabel('Predicted Classs', fontsize=12)
+        # plot.show()
 
 
 if __name__ == '__main__':
