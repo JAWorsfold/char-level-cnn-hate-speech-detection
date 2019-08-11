@@ -57,7 +57,7 @@ def run_model ():
     tweets = data_frame.tweet
 
     svm_stop_words = nltk.corpus.stopwords.words('english')
-    other_words = ['rt']  # may add more later
+    other_words = ['rt', 'ff', 'wtf']  # may add more later
     svm_stop_words.extend(other_words)
     svm_stop_words = svm_tokenizer(svm_preprocessor(' '.join(svm_stop_words)))
     vectorizer = TfidfVectorizer(
@@ -66,24 +66,25 @@ def run_model ():
         stop_words=svm_stop_words,
         ngram_range=(1, 3),
         decode_error='replace',
-        max_features=20000
+        max_features=25000,
+        max_df=0.75
     )
 
     X = pd.DataFrame(vectorizer.fit_transform(tweets).toarray())
     y = data_frame['class'].astype(int)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.1)
 
     # over sampling
     X = pd.concat([X_train, y_train], axis=1)
     not_hate = X[X['class']==0]
     hate = X[X['class']==1]
-    hate_over_sampled = resample(hate, replace=True, n_samples=len(hate)*5, random_state=33)
+    hate_over_sampled = resample(hate, replace=True, n_samples=len(hate)*3, random_state=33)
     X = pd.concat([not_hate, hate_over_sampled])
     X_train = X.drop('class', axis=1)
     y_train = X['class']
 
 
-    for c in [0.25, 0.5, 1, 1.5, 2, 2.5, 3]:
+    for c in [0.1, 0.25, 0.5, 1, 2]:
 
         svm = LinearSVC(C=c)
         svm.fit(X_train, y_train)
