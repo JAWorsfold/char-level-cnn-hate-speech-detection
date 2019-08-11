@@ -29,7 +29,10 @@ def test_preprocessor():
     actual_two = preprocessor(input_two)
     actual_three = preprocessor(input_three)
     actual_four = preprocessor(input_four)
-    assert True
+    assert process_one == actual_one
+    assert process_two == actual_two
+    assert process_three == actual_three
+    assert process_four == actual_four
 
 
 def test_tokenizer():
@@ -37,7 +40,10 @@ def test_tokenizer():
     actual_two = tokenizer(input_two)
     actual_three = tokenizer(input_three)
     actual_four = tokenizer(input_four)
-    assert True
+    assert token_one == actual_one
+    assert token_two == actual_two
+    assert token_three == actual_three
+    assert token_four == actual_four
 
 
 def test_tokenize_and_preprocess():
@@ -45,4 +51,7 @@ def test_tokenize_and_preprocess():
     actual_two = tokenizer(preprocessor(input_two))
     actual_three = tokenizer(preprocessor(input_three))
     actual_four = tokenizer(preprocessor(input_four))
-    assert True
+    assert both_one == actual_one
+    assert both_two == actual_two
+    assert both_three == actual_three
+    assert both_four == actual_four
