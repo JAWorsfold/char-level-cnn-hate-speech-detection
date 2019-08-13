@@ -48,12 +48,12 @@ def svm_tokenizer(tweet):
     return tokenized_tweet
 
 
-def run_model ():
+def run_model(data):
     """
     Decide whether to use over-sampling, under-sampling or SMOTE to deal with imbalance.
     Class split: 0=25863, 1=2285
     """
-    data_frame = pd.read_csv("data/private/td_zw_labeled_data.csv")
+    data_frame = pd.read_csv(data)
     tweets = data_frame.tweet
 
     svm_stop_words = nltk.corpus.stopwords.words('english')
@@ -66,11 +66,11 @@ def run_model ():
         stop_words=svm_stop_words,
         ngram_range=(1, 3),
         decode_error='replace',
-        max_features=25000,
+        max_features=18000,
         max_df=0.75
     )
 
-    X = pd.DataFrame(vectorizer.fit_transform(tweets).toarray())
+    X = pd.DataFrame(np.array(vectorizer.fit_transform(tweets).toarray()), dtype=np.float32)
     y = data_frame['class'].astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.1)
 
@@ -78,13 +78,13 @@ def run_model ():
     X = pd.concat([X_train, y_train], axis=1)
     not_hate = X[X['class']==0]
     hate = X[X['class']==1]
-    hate_over_sampled = resample(hate, replace=True, n_samples=len(hate)*3, random_state=33)
-    X = pd.concat([not_hate, hate_over_sampled])
+    hate = resample(hate, replace=True, n_samples=len(hate)*3, random_state=33)
+    X = pd.concat([not_hate, hate])
     X_train = X.drop('class', axis=1)
     y_train = X['class']
 
 
-    for c in [0.1, 0.25, 0.5, 1, 2]:
+    for c in [0.1, 0.25, 0.3, 0.5, 1]:
 
         svm = LinearSVC(C=c)
         svm.fit(X_train, y_train)
@@ -104,6 +104,8 @@ def run_model ():
         # plot.xlabel('Predicted Classs', fontsize=12)
         # plot.show()
 
+    # may want later for classification of my other tweets.
+    # return svm
 
 if __name__ == '__main__':
-    run_model()
+    run_model("data/private/td_zw_labeled_data.csv")
