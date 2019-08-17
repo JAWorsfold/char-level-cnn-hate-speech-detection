@@ -13,14 +13,14 @@ process_two = "Our visit to discussing the progress we made together and explori
 token_two = "our visit to projectawar discuss the progress we made togeth and explor futur collabor with epakw highlight it role in support environment voluntari initi guardiansofthesea httpswwwinstagramcompbanfcgbmoigshidvcqntspd"
 both_two = "our visit to discuss the progress we made togeth and explor futur collabor with highlight it role in support environment voluntari initi guardiansofthesea"
 
-input_three = "Empty food dish.. pretty sure that look he is giving me is saying something.. you think @thechrisbarron? #Caturday"
-process_three = "Empty food dish.. pretty sure that look he is giving me is saying something.. you think ? #Caturday"
+input_three = "Empty food dish.. pretty sure that look he is giving me is saying something.. you think @thechrisbarron? #Caturday &#123456;"
+process_three = "Empty food dish.. pretty sure that look he is giving me is saying something.. you think ? #Caturday "
 token_three = "empti food dish pretti sure that look he is give me is say someth you think thechrisbarron caturday"
 both_three = "empti food dish pretti sure that look he is give me is say someth you think caturday"
 
-input_four = "TensorWatch: A debugging and visualization system for machine learning http://bit.ly/2KFUvqe   #AI   #DeepLearning   #MachineLearning  #DataScience"
+input_four = "TensorWatch: A debugging and visualization system for machine learning http://bit.ly/2KFUvqe &amp;  #AI   #DeepLearning   #MachineLearning  #DataScience"
 process_four = "TensorWatch: A debugging and visualization system for machine learning #AI #DeepLearning #MachineLearning #DataScience"
-token_four = "tensorwatch a debug and visual system for machin learn httpbitlykfuvq ai deeplearn machinelearn datasci"
+token_four = "tensorwatch a debug and visual system for machin learn httpbitlykfuvq amp ai deeplearn machinelearn datasci"
 both_four = "tensorwatch a debug and visual system for machin learn ai deeplearn machinelearn datasci"
 
 

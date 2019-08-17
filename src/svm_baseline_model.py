@@ -27,8 +27,10 @@ def svm_preprocessor(tweet):
     re_mention = '@[\w\-]+'
     re_url = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
     re_whitespace = '\s+'
-    preprocessed_tweet = re.sub(re_mention, '', tweet)
-    preprocessed_tweet = re.sub(re_url, '', preprocessed_tweet)
+    re_html_entity = '&[^\s]*;' # discovered that Davidson et al. was not utf-8 encoded
+    preprocessed_tweet = re.sub(re_html_entity, ' ', tweet)
+    preprocessed_tweet = re.sub(re_mention, ' ', preprocessed_tweet)
+    preprocessed_tweet = re.sub(re_url, ' ', preprocessed_tweet)
     preprocessed_tweet = re.sub(re_whitespace, ' ', preprocessed_tweet)
     return preprocessed_tweet
 
@@ -48,7 +50,7 @@ def svm_tokenizer(tweet):
     return tokenized_tweet
 
 
-def run_model(data):
+def train_model(data):
     """
     Decide whether to use over-sampling, under-sampling or SMOTE to deal with imbalance.
     Class split: 0=25863, 1=2285
@@ -57,7 +59,7 @@ def run_model(data):
     tweets = data_frame.tweet
 
     svm_stop_words = nltk.corpus.stopwords.words('english')
-    other_words = ['rt', 'ff', 'wtf']  # may add more later
+    other_words = ['rt', 'ff', 'tbt', 'ftw', 'becau']  # may add more later
     svm_stop_words.extend(other_words)
     svm_stop_words = svm_tokenizer(svm_preprocessor(' '.join(svm_stop_words)))
     vectorizer = TfidfVectorizer(
@@ -66,8 +68,9 @@ def run_model(data):
         stop_words=svm_stop_words,
         ngram_range=(1, 3),
         decode_error='replace',
-        max_features=18000,
-        max_df=0.75
+        max_features=15000,
+        max_df=0.75,
+        min_df=5
     )
 
     X = pd.DataFrame(np.array(vectorizer.fit_transform(tweets).toarray()), dtype=np.float32)
@@ -78,13 +81,21 @@ def run_model(data):
     X = pd.concat([X_train, y_train], axis=1)
     not_hate = X[X['class']==0]
     hate = X[X['class']==1]
-    hate = resample(hate, replace=True, n_samples=len(hate)*3, random_state=33)
+    hate = resample(hate, replace=True, n_samples=len(hate)*4, random_state=33)
     X = pd.concat([not_hate, hate])
     X_train = X.drop('class', axis=1)
     y_train = X['class']
 
+    # under sampling
+    # X = pd.concat([X_train, y_train], axis=1)
+    # not_hate = X[X['class']==0]
+    # hate = X[X['class']==1]
+    # not_hate = resample(not_hate, replace=False, n_samples=len(hate)*2, random_state=33)
+    # X = pd.concat([not_hate, hate])
+    # X_train = X.drop('class', axis=1)
+    # y_train = X['class']
 
-    for c in [0.1, 0.25, 0.3, 0.5, 1]:
+    for c in [0.01, 0.025, 0.1, 0.2, 0.25, 0.3, 1]:
 
         svm = LinearSVC(C=c)
         svm.fit(X_train, y_train)
@@ -101,11 +112,11 @@ def run_model(data):
         # plot.figure(figsize=(6,6))
         # sns.heatmap(conf_matrix, annot=True, annot_kws={"size": 12}, cmap='gist_gray_r', square=True, fmt='.2f')
         # plot.ylabel('Actual Class', fontsize=12)
-        # plot.xlabel('Predicted Classs', fontsize=12)
+        # plot.xlabel('Predicted Class', fontsize=12)
         # plot.show()
 
     # may want later for classification of my other tweets.
     # return svm
 
 if __name__ == '__main__':
-    run_model("data/private/td_zw_labeled_data.csv")
+    train_model("data/private/td_zw_labeled_data.csv")
