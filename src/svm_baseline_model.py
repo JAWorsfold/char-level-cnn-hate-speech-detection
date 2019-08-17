@@ -43,7 +43,7 @@ def svm_tokenizer(tweet):
     :return tokenized_tweet: all lowercase, no punctuation and stemmed
     """
     tweet_lower = tweet.lower()
-    no_punc = re.split('[^a-zA-Z ]*', tweet_lower)
+    no_punc = re.split('[^\w\s]|\d|\_', tweet_lower)
     stripped = ''.join(no_punc).strip()
     stemmer = nltk.PorterStemmer()
     tokenized_tweet = [stemmer.stem(w) for w in stripped.split()]
@@ -55,8 +55,7 @@ def train_model(data):
     Decide whether to use over-sampling, under-sampling or SMOTE to deal with imbalance.
     Class split: 0=25863, 1=2285
     """
-    data_frame = pd.read_csv(data)
-    tweets = data_frame.tweet
+    tweet_df = pd.read_csv(data)
 
     svm_stop_words = nltk.corpus.stopwords.words('english')
     other_words = ['rt', 'ff', 'tbt', 'ftw', 'becau']  # may add more later
@@ -73,8 +72,8 @@ def train_model(data):
         min_df=5
     )
 
-    X = pd.DataFrame(np.array(vectorizer.fit_transform(tweets).toarray()), dtype=np.float32)
-    y = data_frame['class'].astype(int)
+    X = pd.DataFrame(np.array(vectorizer.fit_transform(tweet_df.tweet).toarray()), dtype=np.float32)
+    y = tweet_df['class'].astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.1)
 
     # over sampling
