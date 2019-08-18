@@ -6,9 +6,9 @@ from sklearn.model_selection import train_test_split
 import tensorflow as tf
 from keras.preprocessing.sequence import pad_sequences
 from keras.preprocessing.text import Tokenizer
-from keras.layers import Conv1D, Activation, MaxPooling1D
+from keras.layers import Conv1D, Activation, MaxPooling1D, Dropout
 from keras.layers import Input, Embedding, Flatten, Dense
-from keras.models import Model
+from keras.models import Model, Sequential
 
 
 def cnn_preprocessor(tweet):
@@ -60,15 +60,15 @@ def cnn_stopwords(tweet):
 def train_model(data):
     """Train the CNN model"""
 
-
-
+    # get and preprocess the data
     tweet_df = pd.read_csv(data)
     tweet_df['tweet'] = tweet_df['tweet'].apply(lambda x: cnn_stopwords(x))
     tweet_df['tweet'] = tweet_df['tweet'].apply(lambda x: cnn_tokenizer(x))
     tweet_df['tweet'] = tweet_df['tweet'].apply(lambda x: cnn_preprocessor(x))
     y = tweet_df['class'].astype(int)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.1)
+    X_train, X_test, y_train, y_test = train_test_split(tweet_df['tweet'], y, random_state=33, test_size=0.1)
 
+    # create character dictionary as vocabulary and create tokenizer
     tokenizer = Tokenizer(char_level=True)
     tokenizer.fit_on_texts(X_train)
     alphabet = "abcdefghijklmnopqrstuvwxyz "
@@ -79,8 +79,10 @@ def train_model(data):
 
     # cnn parameters
     max_len = 140
-    vocal_size = len(character_encoding)
+    vocab_size = len(character_encoding)
+    embedding_size = len(character_encoding) + 1  # includes padding
 
+    # create one-hot-encodings
     X_train = tokenizer.texts_to_sequences(X_train)
     X_test  = tokenizer.texts_to_sequences(X_test)
 
@@ -90,15 +92,50 @@ def train_model(data):
     X_train = np.array(X_train, dtype=np.float32)
     X_test  = np.array(X_test, dtype=np.float32)
 
+    embeddings = list()
+    embeddings.append(np.zeros(vocab_size))
+
+    for c, i in tokenizer.word_index.items():
+        one_hot = np.zeros(vocab_size)
+        one_hot[i - 1] = 1
+        embeddings.append(one_hot)
+
+    # embeddings and inputs?
+
+
+
+    # build the model
+    model = Sequential()
+
+    # need to figure out input layer
+    model.add(Conv1D(256, 7, activation='relu', input_shape=(seq_length, 100)))
+    model.add(MaxPooling1D(3))
+
+
+
+    model.add(Conv1D(256, 7, activation='relu'))
+    model.add(MaxPooling1D(3))
+
+    model.add(Conv1D(256, 3, activation='relu'))
+    model.add(Conv1D(256, 3, activation='relu'))
+    model.add(Conv1D(256, 3, activation='relu'))
+    model.add(Conv1D(256, 3, activation='relu'))
+    model.add(MaxPooling1D(3))
+
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
+
+    model.add(Dense(1, activation='sigmoid'))
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer='adam',
+                  metrics=['accuracy'])
 
     return
 
 
 if __name__ == '__main__':
-    # train_model("data/private/td_zw_labeled_data.csv")
-
-    alphabet = "abcdefghijklmnopqrstuvwxyz "
-    character_encoding = {}
-    for i, c in enumerate(alphabet):
-        character_encoding[c] = i + 1
-    print(character_encoding)
+    train_model("data/private/td_zw_labeled_data.csv")
