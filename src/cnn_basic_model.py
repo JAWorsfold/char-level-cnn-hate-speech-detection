@@ -80,7 +80,7 @@ def train_model(data):
     # cnn parameters
     max_len = 140
     vocab_size = len(character_encoding)
-    embedding_size = len(character_encoding) + 1  # includes padding
+    embedding_size = len(character_encoding)
 
     # create one-hot-encodings
     X_train = tokenizer.texts_to_sequences(X_train)
@@ -94,45 +94,57 @@ def train_model(data):
 
     embeddings = list()
     embeddings.append(np.zeros(vocab_size))
-
     for c, i in tokenizer.word_index.items():
         one_hot = np.zeros(vocab_size)
         one_hot[i - 1] = 1
         embeddings.append(one_hot)
-
-    # embeddings and inputs?
-
-
+    embeddings = np.array(embeddings)
 
     # build the model
     model = Sequential()
 
-    # need to figure out input layer
-    model.add(Conv1D(256, 7, activation='relu', input_shape=(seq_length, 100)))
+    # input layer
+    # model.add(Input(shape=(max_len,), dtype=np.int64))
+    model.add(Embedding(vocab_size + 1, embedding_size, input_length=max_len, weights=[embeddings]))
+
+    # convolution and pooling layers
+    model.add(Conv1D(256, 7, activation='relu', input_shape=(max_len,), input_dtype=np.int64))
     model.add(MaxPooling1D(3))
-
-
-
     model.add(Conv1D(256, 7, activation='relu'))
     model.add(MaxPooling1D(3))
-
     model.add(Conv1D(256, 3, activation='relu'))
     model.add(Conv1D(256, 3, activation='relu'))
     model.add(Conv1D(256, 3, activation='relu'))
     model.add(Conv1D(256, 3, activation='relu'))
     model.add(MaxPooling1D(3))
+    model.add(Flatten())
 
+    # fully connected layer
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(1024, activation='relu'))
     model.add(Dropout(0.5))
 
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
-
+    # output layer
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(loss='binary_crossentropy',
                   optimizer='adam',
                   metrics=['accuracy'])
+
+    print(model.summary())
+
+    # train the model
+    history = model.fit(X_train, y_train,
+                validation_data=(X_test, y_test),
+                batch_size=100,
+                epochs=10,
+                verbose=2)
+
+    loss, accuracy = model.evaluate(X_train, y_train, verbose=True)
+    print("Training Accuracy: {:.5f}".format(accuracy))
+    loss, accuracy = model.evaluate(X_test, y_test, verbose=True)
+    print("Testing Accuracy: {:.5f}".format(accuracy))
 
     return
 
