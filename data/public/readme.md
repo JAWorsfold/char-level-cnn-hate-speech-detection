@@ -1,4 +1,4 @@
-**waseem_labaled_id_data.csv** - this data set was accessed via the repository belonging to  Zhang, Z. et al. which can be found
+**waseem_labeled_id_data.csv** - this data set was accessed via the repository belonging to  Zhang, Z. et al. which can be found
 [here.](https://github.com/ziqizhang/chase/tree/master/data/ml/public/w%2Bws)
 
 The labels can be identified as such: 
