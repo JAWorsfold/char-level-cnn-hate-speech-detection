@@ -23,9 +23,9 @@ test_real_result = ['896523232098078720,\"\"\"No one is born hating another pers
                     '796394920051441664,\"\"\"To all the little girls watching...never doubt that you are valuable and powerful &amp; deserving of every chance &amp; opportunity in the world.\"\"\",0\n']
 
 def test_read_tweet_ids():
-    result_one = read_tweet_ids('test/test_data_one.csv')
-    result_two = read_tweet_ids('test/test_data_two.csv')
-    result_three = read_tweet_ids('test/test_data_real.csv')
+    result_one = read_tweet_ids('test/api_data/input_one.csv')
+    result_two = read_tweet_ids('test/api_data/input_two.csv')
+    result_three = read_tweet_ids('test/api_data/input_real.csv')
     assert result_one == test_one
     assert result_two == test_two
     assert result_three == test_real_id
@@ -59,13 +59,13 @@ def test_string_to_csv():
 
 
 def test_write_tweet_status():
-    write_tweet_status('test/test_write_one.csv',test_one)
-    write_tweet_status('test/test_write_two.csv',test_two)
+    write_tweet_status('test/api_data/output_one.csv',test_one)
+    write_tweet_status('test/api_data/output_two.csv',test_two)
     #write_tweet_status(test_three)
 
-    with open('test/test_write_one.csv') as test_file:
+    with open('test/api_data/output_one.csv') as test_file:
         test_file_one = test_file.readlines()
-    with open('test/test_write_two.csv') as test_file:
+    with open('test/api_data/output_two.csv') as test_file:
         test_file_two = test_file.readlines()
 
     assert test_file_one == test_one
@@ -73,8 +73,8 @@ def test_write_tweet_status():
 
 
 def test_get_tweets():
-    input_file = 'test/test_data_real.csv'
-    output_file = 'test/test_write_real.csv'
+    input_file = 'test/api_data/input_real.csv'
+    output_file = 'test/api_data/output_real.csv'
     get_tweets(input_file, output_file)
     output_read_array = read_tweet_ids(output_file)
     assert output_read_array == test_real_result

@@ -1,4 +1,4 @@
-from src.svm_baseline_model import *
+from src.train_svm import *
 
 #test data
 #Need to know what the stemmer will return. Use test tweets (obama etc).
