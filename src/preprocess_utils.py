@@ -99,8 +99,8 @@ class PreProcessUtils:
     @staticmethod
     def tokenize(text):
         """Split text into smaller pieces, or tokens"""
-        tokenized_text = text
-        return tokenized_text
+        tk_text = [w for w in text.split()]
+        return tk_text
 
 
     @staticmethod
