@@ -34,7 +34,7 @@ class PreProcessUtils:
         if re_numbers is not None: _re_numbers = re_numbers
 
 
-    def remove_noise(self, text, mentions=False, urls=False, html_entities=False, replacement=''):
+    def remove_noise(self, text, mentions=False, urls=True, html_entities=True, replacement=''):
         """
         Remove noise from the input text based on specified parameters:
 
@@ -55,7 +55,7 @@ class PreProcessUtils:
 
 
     def normalise(self, text, lowercase=True, punctuation=True, numbers=False, whitespace=True,
-                  replacement='', stopwords=True, other_stopwords=list()):
+                  replacement='', stopwords=True, other_stopwords=list(), stem_words=False):
         """
         Normalise the input text based on specified parameters:
 
@@ -91,19 +91,22 @@ class PreProcessUtils:
     @staticmethod
     def _to_lowercase(text):
         """Convert all characters in text to lowercase"""
-        lowercase_text = text
-        return lowercase_text
+        return text.lower()
 
 
     @staticmethod
-    def _remove_stopwords(text, other_stopwords):
+    def _remove_stopwords(text, add_words):
         """Remove stop words from text"""
-        no_stopwords_text = text
-        return no_stopwords_text
+        stop_words = nltk.corpus.stopwords.words('english')
+        stop_words.extend(add_words)
+        stopped_text = ' '.join([w for w in text.split(' ') if w not in stop_words])
+        return stopped_text
 
 
     @staticmethod
     def _stem_words(text):
+        # ToDo: allow user to pass a different stemmer as an arguments
         """Stem words in text"""
-        stemmed_text = text
+        stemmer = nltk.PorterStemmer()
+        stemmed_text = ' '.join([stemmer.stem(w) for w in text.split()])
         return stemmed_text
