@@ -58,7 +58,7 @@ class PreProcessUtils:
 
 
     def normalise(self, text, lowercase=True, punctuation=True, numbers=False, whitespace=True,
-                  replacement='', stopwords=True, other_stopwords=list(), stem_words=False):
+                  replacement='', stopwords=True, other_stopwords=[], stem_words=False):
         """
         Normalise the input text based on specified parameters:
 
@@ -77,7 +77,7 @@ class PreProcessUtils:
         :param stopwords: Remove English stop words using nltk corpus
         :type stopwords: boolean
         :param other_stopwords: Additional stop words to remove
-        :type other_stopwords: array
+        :type other_stopwords: list
         :param stem_words: Stem words each word in the text
         :type stem_words: boolean
         :return: Normalised text
@@ -104,17 +104,23 @@ class PreProcessUtils:
 
 
     @staticmethod
+    def stop_words(add_words):
+        """Return a list of stop words"""
+        # ToDo: allow user to pass a different corpus of stop words as an argument
+        stop_words = nltk.corpus.stopwords.words('english')
+        stop_words.extend(add_words)
+        return stop_words
+
+
+    @staticmethod
     def _to_lowercase(text):
         """Convert all characters in text to lowercase"""
         return text.lower()
 
 
-    @staticmethod
-    def _remove_stopwords(text, add_words):
+    def _remove_stopwords(self, text, add_words):
         """Remove stop words from text"""
-        # ToDo: allow user to pass a different corpus of stop words as an argument
-        stop_words = nltk.corpus.stopwords.words('english')
-        stop_words.extend(add_words)
+        stop_words = self.stop_words(add_words)
         stopped_text = ' '.join([w for w in text.split(' ') if w not in stop_words])
         return stopped_text
 
