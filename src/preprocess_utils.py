@@ -18,7 +18,7 @@ class PreProcessUtils:
     _re_mentions = '@[\w\-]+'
     _re_whitespace = '\s+'
     _re_html_entities = '&[^\s]*;'
-    _re_punctuation = '[^\w\s]\_'
+    _re_punctuation = '[^\w\s]|_'
     _re_numbers = '\d'
 
 
@@ -78,10 +78,22 @@ class PreProcessUtils:
         :type stopwords: boolean
         :param other_stopwords: Additional stop words to remove
         :type other_stopwords: array
+        :param stem_words: Stem words each word in the text
+        :type stem_words: boolean
         :return: Normalised text
         """
-        normalised_text = text
-        return normalised_text
+        nl_text = text
+        if lowercase:   nl_text = self._to_lowercase(nl_text)
+        if punctuation: nl_text = re.sub(self._re_punctuation, replacement, nl_text)
+        if numbers:     nl_text = re.sub(self._re_numbers, replacement, nl_text)
+        if stopwords:   nl_text = self._remove_stopwords(nl_text, other_stopwords)
+        if stem_words:  nl_text = self._stem_words(nl_text)
+        ws = self._re_whitespace
+        if whitespace:  nl_text = re.sub(ws, replacement, nl_text)
+        # remove any leading or trailing whitespace
+        lead_trail_ws = f"^{ws}|{ws}$"
+        nl_text = re.sub(lead_trail_ws, '', nl_text)
+        return nl_text
 
 
     @staticmethod

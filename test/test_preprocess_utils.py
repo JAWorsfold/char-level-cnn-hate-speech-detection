@@ -37,7 +37,7 @@ def test_normalise_stopwords_stem_false(pre_processor, test_data):
 
 
 def test_normalise_stopwords_stem_true(pre_processor, test_data):
-    with open('test/preprocess_data/normalised.csv') as expected:
+    with open('test/preprocess_data/normalised_stopped_stemmed.csv') as expected:
         exp_lst = list(csv.reader(expected))
     add_stopwords = ['rt']
     for i in range(len(exp_lst)):
