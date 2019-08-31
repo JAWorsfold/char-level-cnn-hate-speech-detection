@@ -19,8 +19,10 @@ test_two = ['234123513245,0\n',
 test_real_id = ['896523232098078720,0\n',
                 '796394920051441664,0\n']
 
-test_real_result = ['896523232098078720,\"\"\"No one is born hating another person because of the color of his skin or his background or his religion...\"\" https://t.co/InZ58zkoAm\",0\n',
-                    '796394920051441664,\"\"\"To all the little girls watching...never doubt that you are valuable and powerful &amp; deserving of every chance &amp; opportunity in the world.\"\"\",0\n']
+test_real_result = (['896523232098078720,\"\"\"No one is born hating another person because of the color '
+                     'of his skin or his background or his religion...\"\" https://t.co/InZ58zkoAm\",0\n',
+                    '796394920051441664,\"\"\"To all the little girls watching...never doubt that you are '
+                    'valuable and powerful &amp; deserving of every chance &amp; opportunity in the world.\"\"\",0\n'])
 
 def test_read_tweet_ids():
     result_one = read_tweet_ids('test/api_data/input_one.csv')
