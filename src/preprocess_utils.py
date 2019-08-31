@@ -48,10 +48,13 @@ class PreProcessUtils:
         :type html_entities: boolean
         :param replacement: Value to use for replacement
         :type replacement: string
-        :return: A processed text with noise removed
+        :return: Pre-processed text with noise removed
         """
-        processed_text = text
-        return processed_text
+        pp_text = text
+        if mentions:      pp_text = re.sub(self._re_mentions, replacement, pp_text)
+        if urls:          pp_text = re.sub(self._re_urls, replacement, pp_text)
+        if html_entities: pp_text = re.sub(self._re_html_entities, replacement, pp_text)
+        return pp_text
 
 
     def normalise(self, text, lowercase=True, punctuation=True, numbers=False, whitespace=True,
@@ -97,6 +100,7 @@ class PreProcessUtils:
     @staticmethod
     def _remove_stopwords(text, add_words):
         """Remove stop words from text"""
+        # ToDo: allow user to pass a different corpus of stop words as an argument
         stop_words = nltk.corpus.stopwords.words('english')
         stop_words.extend(add_words)
         stopped_text = ' '.join([w for w in text.split(' ') if w not in stop_words])
@@ -105,8 +109,8 @@ class PreProcessUtils:
 
     @staticmethod
     def _stem_words(text):
-        # ToDo: allow user to pass a different stemmer as an arguments
         """Stem words in text"""
+        # ToDo: allow user to pass a different stemmer as an argument
         stemmer = nltk.PorterStemmer()
         stemmed_text = ' '.join([stemmer.stem(w) for w in text.split()])
         return stemmed_text
