@@ -1,53 +1,40 @@
 """This model is based partly on a similar model used by Thomas Davidson et al. in
 his paper: TBC"""
 
-import re
 import numpy as np
 import pandas as pd
-import nltk
+import matplotlib.pyplot as plot
+import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
-import matplotlib.pyplot as plot
-import seaborn as sns
+from src.preprocess_utils import PreProcessUtils
+
+
+PP = PreProcessUtils()
 
 
 def svm_preprocessor(tweet):
     """
-    Take a tweet - which is just a simple text string - and remove or replace:
-    1) Mentions i.e. @someone
-    2) URLs i.e. https://www.twitter.com
-    3) Repeated whitespace
+    Convert tweet to lowercase, stem words and remove or replace:
+    1) Mentions i.e. @someone, 2) URLs i.e. https://www.twitter.com, 3) HTML entitiesRepeated,
+    4) whitespace, 5) punctuation, 6) number, 7) stop words
+    See PreProcessUtils Class for more details.
     :param tweet: text string
-    :return preprocessed_tweet: without mentions, URLs and extra whitespace
+    :return pp_tweet: A pre-processed tweet
     """
-    re_mention = '@[\w\-]+'
-    re_url = 'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
-    re_whitespace = '\s+'
-    re_html_entity = '&[^\s]*;' # discovered that Davidson et al. was not utf-8 encoded
-    preprocessed_tweet = re.sub(re_html_entity, ' ', tweet)
-    preprocessed_tweet = re.sub(re_mention, ' ', preprocessed_tweet)
-    preprocessed_tweet = re.sub(re_url, ' ', preprocessed_tweet)
-    preprocessed_tweet = re.sub(re_whitespace, ' ', preprocessed_tweet)
-    return preprocessed_tweet
+    pp_tweet = tweet
+    pp_tweet = PP.remove_noise(pp_tweet, mentions=True, replacement=' ')
+    pp_tweet = PP.normalise(pp_tweet, numbers=True, stopwords=True, stem_words=True, replacement=' ')
+    return pp_tweet
 
 
 def svm_tokenizer(tweet):
-    """
-    Take a tweet - a simple text string - and remove punctuation, set characters to
-    lowercase and stem the tweets.
-    :param tweet: a text string
-    :return tokenized_tweet: all lowercase, no punctuation and stemmed
-    """
-    tweet_lower = tweet.lower()
-    no_punc = re.split('[^\w\s]|\d|\_', tweet_lower)
-    stripped = ''.join(no_punc).strip()
-    stemmer = nltk.PorterStemmer()
-    tokenized_tweet = [stemmer.stem(w) for w in stripped.split()]
-    return tokenized_tweet
+    """Tokenize the tweet"""
+    return PreProcessUtils.tokenize(tweet)
 
 
 def train_model(data):
@@ -57,10 +44,10 @@ def train_model(data):
     """
     tweet_df = pd.read_csv(data)
 
-    svm_stop_words = nltk.corpus.stopwords.words('english')
-    other_words = ['rt', 'ff', 'tbt', 'ftw', 'becau']  # may add more later
-    svm_stop_words.extend(other_words)
-    svm_stop_words = svm_tokenizer(svm_preprocessor(' '.join(svm_stop_words)))
+    more_stopwords = ['rt', 'ff', 'tbt', 'ftw']  # may add more later
+    svm_stop_words = PP.stop_words(more_stopwords)
+
+    # svm_stop_words = svm_tokenizer(svm_preprocessor(' '.join(svm_stop_words)))
     vectorizer = TfidfVectorizer(
         preprocessor=svm_preprocessor,
         tokenizer=svm_tokenizer,
@@ -71,6 +58,7 @@ def train_model(data):
         max_df=0.75,
         min_df=5
     )
+
 
     X = pd.DataFrame(np.array(vectorizer.fit_transform(tweet_df.tweet).toarray()), dtype=np.float32)
     y = tweet_df['class'].astype(int)
@@ -94,18 +82,18 @@ def train_model(data):
     # X_train = X.drop('class', axis=1)
     # y_train = X['class']
 
-    for c in [0.01, 0.025, 0.1, 0.2, 0.25, 0.3, 1]:
+    # for c in [0.01, 0.025, 0.1, 0.2, 0.25, 0.3, 1]:
 
-        svm = LinearSVC(C=c)
-        svm.fit(X_train, y_train)
-        y_pred = svm.predict(X_test)
-        results = classification_report(y_test, y_pred)
-        print('####################### C=' + str(c) + ' #######################')
-        print(results)
-        print()
+    svm = LinearSVC(C=0.1)
+    svm.fit(X_train, y_train)
+    y_pred = svm.predict(X_test)
+    results = classification_report(y_test, y_pred)
+    print('####################### C=' + str(0.1) + ' #######################')
+    print(results)
+    print()
 
-        conf_matrix = confusion_matrix(y_test, y_pred)
-        print(conf_matrix)
+    conf_matrix = confusion_matrix(y_test, y_pred)
+    print(conf_matrix)
         # names = ['Non-hate', 'Hate']
         # df_cm = pd.DataFrame(conf_matrix, index=names, columns=names)
         # plot.figure(figsize=(6,6))
@@ -115,7 +103,12 @@ def train_model(data):
         # plot.show()
 
     # may want later for classification of my other tweets.
-    # return svm
+    return svm, vectorizer
 
 if __name__ == '__main__':
-    train_model("data/private/td_zw_labeled_data.csv")
+    train_model('data/private/td_zw_labeled_data.csv')
+    # model, vectorizer = train_model('data/private/td_zw_labeled_data.csv')
+    # test_pred_tweet = ["1 h4t3Handic4pF4gg0ts love"]
+    # test_pred = vectorizer.transform(test_pred_tweet)
+    # pred_result = model.predict(test_pred)
+    # print("test = %s, Predicted = %s" % (test_pred, pred_result))
