@@ -1,5 +1,6 @@
 """This model is based partly on a similar model used by Thomas Davidson et al. in
-his paper: TBC"""
+his paper: Automated Hate Speech Detection and the Problem of Offensive Language.
+Source: https://github.com/t-davidson/hate-speech-and-offensive-language"""
 
 import numpy as np
 import pandas as pd
@@ -47,7 +48,6 @@ def train_model(data):
     more_stopwords = ['rt', 'ff', 'tbt', 'ftw']  # may add more later
     svm_stop_words = PP.stop_words(more_stopwords)
 
-    # svm_stop_words = svm_tokenizer(svm_preprocessor(' '.join(svm_stop_words)))
     vectorizer = TfidfVectorizer(
         preprocessor=svm_preprocessor,
         tokenizer=svm_tokenizer,
@@ -58,7 +58,6 @@ def train_model(data):
         max_df=0.75,
         min_df=5
     )
-
 
     X = pd.DataFrame(np.array(vectorizer.fit_transform(tweet_df.tweet).toarray()), dtype=np.float32)
     y = tweet_df['class'].astype(int)
@@ -106,9 +105,9 @@ def train_model(data):
     return svm, vectorizer
 
 if __name__ == '__main__':
-    train_model('data/private/td_zw_labeled_data.csv')
-    # model, vectorizer = train_model('data/private/td_zw_labeled_data.csv')
-    # test_pred_tweet = ["1 h4t3Handic4pF4gg0ts love"]
-    # test_pred = vectorizer.transform(test_pred_tweet)
-    # pred_result = model.predict(test_pred)
-    # print("test = %s, Predicted = %s" % (test_pred, pred_result))
+    # train_model('data/private/td_zw_labeled_data.csv')
+    model, vectorizer = train_model('data/private/td_zw_labeled_data.csv')
+    test_pred_tweet = ["i hate handicap faggots"]
+    test_pred = vectorizer.transform(test_pred_tweet)
+    pred_result = model.predict(test_pred)
+    print("test = %s, Predicted = %s" % (test_pred, pred_result))
