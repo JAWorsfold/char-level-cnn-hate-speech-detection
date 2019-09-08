@@ -8,7 +8,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.linear_model import LogisticRegression
-from sklearn.utils import resample
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from src.preprocess_utils import PreProcessUtils
@@ -39,10 +38,7 @@ def lr_tokenizer(tweet):
 
 
 def train_model(data):
-    """
-    Decide whether to use over-sampling, under-sampling or SMOTE to deal with imbalance.
-    Class split: 0=25863, 1=2285
-    """
+    """Train the model"""
     tweet_df = pd.read_csv(data)
 
     more_stopwords = ['rt', 'ff', 'tbt', 'ftw']  # may add more later
@@ -63,21 +59,14 @@ def train_model(data):
     y = tweet_df['class'].astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.1)
 
-    # over sampling
-    X = pd.concat([X_train, y_train], axis=1)
-    not_hate = X[X['class']==0]
-    hate = X[X['class']==1]
-    hate = resample(hate, replace=True, n_samples=len(hate)*4, random_state=33)
-    X = pd.concat([not_hate, hate])
-    X_train = X.drop('class', axis=1)
-    y_train = X['class']
+    c = [0.01, 0.1]
 
-    C = [0.01, 0.1, 0.2, 0.25, 0.5, 1, 2, 3, 5]
+    parameters = [{"penalty": ["l1"], "C": c, "solver": ["saga", "liblinear"]},
+                  {"penalty": ["l2"], "C": c, "solver": ["saga", "sag"]}]
 
-    parameters = [{"penalty": ["l1"], "C": C, "solver": ["saga", "liblinear"]},
-                  {"penalty": ["l2"], "C": C, "solver": ["saga", "sag"]}]
-
-    classifier = GridSearchCV(LogisticRegression(), parameters,
+    classifier = GridSearchCV(LogisticRegression(class_weight="balanced",random_state=33),
+                              parameters,
+                              scoring="f1_micro",
                               cv=StratifiedKFold(n_splits=5, random_state=33).split(X_train, y_train),
                               verbose=2)
 
@@ -110,16 +99,15 @@ if __name__ == '__main__':
     pickle.dump(model, open("models/logreg.pickle", "wb"))
     pickle.dump(vectorizer, open("models/vectorizer.pickle", "wb"))
 
-
     test_pred_tweet = ["i hate handicap faggots"]
     test_pred = vectorizer.transform(test_pred_tweet)
     pred_result = model.predict(test_pred)
 
-    print("test = %s" % (test_pred))
-    print("model.predict = %s" % (pred_result))
+    print("test = %s" % test_pred)
+    print("model.predict = %s" % pred_result)
 
     pred_result = model.predict_log_proba(test_pred)
-    print("model.predict_log_proba = %s" % (pred_result))
+    print("model.predict_log_proba = %s" % pred_result)
 
     pred_result = model.predict_proba(test_pred)
-    print("model.predict_proba = %s" % (pred_result))
+    print("model.predict_proba = %s" % pred_result)
