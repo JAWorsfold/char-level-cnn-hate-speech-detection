@@ -8,12 +8,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_selection import SelectFromModel
-from sklearn.pipeline import Pipeline
 from sklearn.utils import resample
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from src.preprocess_utils import PreProcessUtils
+import pickle
 
 
 PP = PreProcessUtils()
@@ -73,18 +72,27 @@ def train_model(data):
     X_train = X.drop('class', axis=1)
     y_train = X['class']
 
-    pipeline = Pipeline(
-        [('select', SelectFromModel(LogisticRegression(class_weight='balanced',
-                                                       penalty="l1", C=0.01, solver='liblinear'))),
-         ('model', LogisticRegression(class_weight='balanced', penalty='l2', solver='sag'))])
-    parameters = [{}]
+    C = [0.01, 0.1, 0.2, 0.25, 0.5, 1, 2, 3, 5]
 
-    grid_search = GridSearchCV(pipeline,
-                               parameters,
-                               cv=StratifiedKFold(n_splits=5, random_state=33).split(X_train, y_train),
-                               verbose=2)
+    parameters = [{"penalty": ["l1"], "C": C, "solver": ["saga", "liblinear"]},
+                  {"penalty": ["l2"], "C": C, "solver": ["saga", "sag"]}]
 
-    lr = grid_search.fit(X_train, y_train)
+    classifier = GridSearchCV(LogisticRegression(), parameters,
+                              cv=StratifiedKFold(n_splits=5, random_state=33).split(X_train, y_train),
+                              verbose=2)
+
+    classifier.fit(X_train, y_train)
+
+    print("best paramaters: ")
+    print(classifier.best_params_)
+    print("best estimator: ")
+    print(classifier.best_estimator_)
+    print("best score: ")
+    print(classifier.best_score_)
+
+    print("train best")
+    lr = classifier.best_estimator_
+    lr.fit(X_train, y_train)
     y_pred = lr.predict(X_test)
     results = classification_report(y_test, y_pred)
     print(results)
@@ -98,6 +106,11 @@ def train_model(data):
 if __name__ == '__main__':
     # train_model('data/private/td_zw_labeled_data.csv')
     model, vectorizer = train_model('data/private/td_zw_labeled_data.csv')
+
+    pickle.dump(model, open("models/logreg.pickle", "wb"))
+    pickle.dump(vectorizer, open("models/vectorizer.pickle", "wb"))
+
+
     test_pred_tweet = ["i hate handicap faggots"]
     test_pred = vectorizer.transform(test_pred_tweet)
     pred_result = model.predict(test_pred)
