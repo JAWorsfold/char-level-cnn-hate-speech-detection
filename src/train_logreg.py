@@ -59,28 +59,18 @@ def train_model(data):
     y = tweet_df['class'].astype(int)
     X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=33, test_size=0.1)
 
-    c = [0.01, 0.1]
+    # best parameters found: C: 0.01, l1, saga
+    # c = [0.01, 0.1]
+    # parameters = [{"penalty": ["l1"], "C": c, "solver": ["saga", "liblinear"]},
+    #               {"penalty": ["l2"], "C": c, "solver": ["saga", "sag"]}]
+    # classifier = GridSearchCV(LogisticRegression(class_weight="balanced",random_state=33),
+    #                           parameters,
+    #                           scoring="f1_micro",
+    #                           cv=StratifiedKFold(n_splits=5, random_state=33).split(X_train, y_train),
+    #                           verbose=2)
+    # classifier.fit(X_train, y_train)
 
-    parameters = [{"penalty": ["l1"], "C": c, "solver": ["saga", "liblinear"]},
-                  {"penalty": ["l2"], "C": c, "solver": ["saga", "sag"]}]
-
-    classifier = GridSearchCV(LogisticRegression(class_weight="balanced",random_state=33),
-                              parameters,
-                              scoring="f1_micro",
-                              cv=StratifiedKFold(n_splits=5, random_state=33).split(X_train, y_train),
-                              verbose=2)
-
-    classifier.fit(X_train, y_train)
-
-    print("best paramaters: ")
-    print(classifier.best_params_)
-    print("best estimator: ")
-    print(classifier.best_estimator_)
-    print("best score: ")
-    print(classifier.best_score_)
-
-    print("train best")
-    lr = classifier.best_estimator_
+    lr = LogisticRegression(C=0.01, solver='saga', penalty='l1', class_weight='balanced', random_state=33)
     lr.fit(X_train, y_train)
     y_pred = lr.predict(X_test)
     results = classification_report(y_test, y_pred)
