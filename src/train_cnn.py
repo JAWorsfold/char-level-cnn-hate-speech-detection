@@ -5,7 +5,6 @@ Source: https://arxiv.org/pdf/1509.01626.pdf """
 import random
 import numpy as np
 import pandas as pd
-import tensorflow as tf
 import pickle
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -85,7 +84,7 @@ def train_model(data, advanced=False):
                                                                            stem_words=True, replacement=' '))
 
     y = tweet_df['class'].astype(int)
-    X_train, X_test, y_train, y_test = train_test_split(tweet_df['tweet'], y, random_state=33, test_size=0.1)
+    X_train, X_val, y_train, y_val = train_test_split(tweet_df['tweet'], y, random_state=33, test_size=0.1)
 
     # adversarial training for leet speak
     if advanced:
@@ -95,14 +94,6 @@ def train_model(data, advanced=False):
         X = pd.concat([X, tweet_at])
         X_train = X['tweet']
         y_train = X['class']
-        X = pd.concat([X_test, y_test], axis=1)
-        tweet_at = X
-        tweet_at['tweet'] = tweet_at['tweet'].apply(lambda x: insert_leetspeak(x))
-        X = pd.concat([X, tweet_at])
-        X_test = X['tweet']
-        y_test = X['class']
-
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, random_state=33, test_size=0.1)
 
     # over sampling
     X = pd.concat([X_train, y_train], axis=1)
@@ -133,15 +124,12 @@ def train_model(data, advanced=False):
 
     # create one-hot-encodings
     X_train = tokenizer.texts_to_sequences(X_train)
-    X_test  = tokenizer.texts_to_sequences(X_test)
     X_val = tokenizer.texts_to_sequences(X_val)
 
     X_train = pad_sequences(X_train, maxlen=max_len, padding='post')
-    X_test  = pad_sequences(X_test, maxlen=max_len, padding='post')
     X_val = pad_sequences(X_val, maxlen=max_len, padding='post')
 
     X_train = np.array(X_train, dtype=np.float32)
-    X_test  = np.array(X_test, dtype=np.float32)
     X_val = np.array(X_val, dtype=np.float32)
 
     embeddings = list()
@@ -188,36 +176,27 @@ def train_model(data, advanced=False):
     history = model.fit(X_train, y_train,
                         validation_data=(X_val, y_val),
                         batch_size=100,
-                        epochs=5,
+                        epochs=6,
                         verbose=2)
 
     plot_history(history)
 
     loss, accuracy = model.evaluate(X_train, y_train, verbose=True)
     print("Training Accuracy: {:.5f}".format(accuracy))
-    loss, accuracy = model.evaluate(X_test, y_test, verbose=True)
-    print("Testing Accuracy: {:.5f}".format(accuracy))
-
-    y_pred = model.predict_classes(X_test)
-    results = classification_report(y_test, y_pred)
-    print(results)
-    print()
-    conf_matrix = confusion_matrix(y_test, y_pred)
-    print(conf_matrix)
 
     return model, tokenizer
 
 
 if __name__ == '__main__':
     # basic model trained
-    cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
-    cnn.save("models/cnn7.keras")
-    pickle.dump(tokenizer, open("models/cnn7_tokenizer.pickle", "wb"))
+    #cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
+    #cnn.save("models/cnn2.keras")
+    #pickle.dump(tokenizer, open("models/cnn2_tokenizer.pickle", "wb"))
 
     # advanced model trained
-    # cnn_plus, tokenizer = train_model("data/private/td_zw_labeled_data.csv", advanced=True)
-    # cnn_plus.save("models/cnn+.keras")
-    # pickle.dump(tokenizer, open("models/cnn+_tokenizer.pickle", "wb"))
+    cnn_plus, tokenizer = train_model("data/private/td_zw_labeled_data.csv", advanced=True)
+    cnn_plus.save("models/cnn+.keras")
+    pickle.dump(tokenizer, open("models/cnn+_tokenizer.pickle", "wb"))
 
     # test_pred_tweet = ["i hate handicap faggots"]
     # pred_result = cnn.predict_classes(test_pred_tweet)
