@@ -1,8 +1,13 @@
+"""This model is based partly on a similar model used by Yann LeCun et al. in
+the paper: Character-level Convolutional Networks for Text Classification.
+Source: https://arxiv.org/pdf/1509.01626.pdf """
+
 import random
 import numpy as np
 import pandas as pd
 import tensorflow as tf
 import pickle
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample
 from keras.preprocessing.sequence import pad_sequences
@@ -10,7 +15,6 @@ from keras.preprocessing.text import Tokenizer
 from keras.layers import Conv1D, Activation, MaxPooling1D, Dropout
 from keras.layers import Input, Embedding, Flatten, Dense
 from keras.models import Model, Sequential
-from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from src.preprocess_utils import PreProcessUtils
@@ -33,10 +37,30 @@ def append_non_hate(tweet, non_hate_terms):
     return tweet + str(append_term)
 
 
+def plot_history(history):
+    """Plot the model accuracy and model loss during training"""
+    # plot history for loss
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper right')
+    plt.show()
+    # plot history for accuracy
+    plt.plot(history.history['acc'])
+    plt.plot(history.history['val_acc'])
+    plt.title('model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper right')
+    plt.show()
+
+
 def train_model(data, advanced=False):
     """Train the CNN model"""
     pp = PreProcessUtils()
-    more_stopwords = ['rt', 'ff', 'tbt', 'ftw']  # may add more later
+    more_stopwords = ['rt', 'ff', 'tbt', 'ftw', 'dm']  # may add more later
 
     # get and pre-process the data
     tweet_df = pd.read_csv(data)
@@ -44,10 +68,10 @@ def train_model(data, advanced=False):
     # adversarial training
     if advanced:
         # for whitespace removal
-        tweet_df['tweet'] = tweet_df['tweet'].apply(lambda x: pp.remove_noise(x, mentions=True, replacement=''))
+        tweet_df['tweet'] = tweet_df['tweet'].apply(lambda x: pp.remove_noise(x, mentions=False, replacement=''))
         tweet_df['tweet'] = tweet_df['tweet'].apply(lambda x: pp.normalise(x, punctuation=False, numbers=False,
-                                                                           other_stopwords=more_stopwords,
-                                                                           stem_words=True, replacement=''))
+                                                                           stopwords=False, stem_words=False,
+                                                                           replacement=''))
 
         # for word appending
         non_hate_terms = ['love', 'peace', 'tolerance']
@@ -163,9 +187,11 @@ def train_model(data, advanced=False):
     # train the model and use history for graphing
     history = model.fit(X_train, y_train,
                         validation_data=(X_val, y_val),
-                        batch_size=150,
-                        epochs=7,
+                        batch_size=100,
+                        epochs=5,
                         verbose=2)
+
+    plot_history(history)
 
     loss, accuracy = model.evaluate(X_train, y_train, verbose=True)
     print("Training Accuracy: {:.5f}".format(accuracy))
@@ -184,14 +210,14 @@ def train_model(data, advanced=False):
 
 if __name__ == '__main__':
     # basic model trained
-    # cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
-    # cnn.save("models/cnn.keras")
-    # pickle.dump(tokenizer, open("models/cnn_tokenizer.pickle", "wb"))
+    cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
+    cnn.save("models/cnn7.keras")
+    pickle.dump(tokenizer, open("models/cnn7_tokenizer.pickle", "wb"))
 
     # advanced model trained
-    cnn_plus, tokenizer = train_model("data/private/td_zw_labeled_data.csv", advanced=True)
-    cnn_plus.save("models/cnn++.keras")
-    pickle.dump(tokenizer, open("models/cnn++_tokenizer.pickle", "wb"))
+    # cnn_plus, tokenizer = train_model("data/private/td_zw_labeled_data.csv", advanced=True)
+    # cnn_plus.save("models/cnn+.keras")
+    # pickle.dump(tokenizer, open("models/cnn+_tokenizer.pickle", "wb"))
 
     # test_pred_tweet = ["i hate handicap faggots"]
     # pred_result = cnn.predict_classes(test_pred_tweet)
