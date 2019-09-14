@@ -4,6 +4,7 @@ Source: https://github.com/t-davidson/hate-speech-and-offensive-language"""
 
 import numpy as np
 import pandas as pd
+import pickle
 import matplotlib.pyplot as plot
 import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -45,7 +46,7 @@ def train_model(data):
     """
     tweet_df = pd.read_csv(data)
 
-    more_stopwords = ['rt', 'ff', 'tbt', 'ftw']  # may add more later
+    more_stopwords = ['rt', 'ff', 'tbt', 'ftw', 'dm']  # may add more later
     svm_stop_words = PP.stop_words(more_stopwords)
 
     vectorizer = TfidfVectorizer(
@@ -107,7 +108,12 @@ def train_model(data):
 if __name__ == '__main__':
     # train_model('data/private/td_zw_labeled_data.csv')
     model, vectorizer = train_model('data/private/td_zw_labeled_data.csv')
-    test_pred_tweet = ["i hate handicap faggots"]
+
+    pickle.dump(model, open("models/svm.pickle", "wb"))
+    pickle.dump(vectorizer, open("models/svm_vectorizer.pickle", "wb"))
+
+    test_pred_tweet = ["Listen up women, there is a reason why god made men stronger than you. It's because rape is a force of good, that should be celebrated. IF a man wants to fill you with his big cock, you should learn to : relax, orgasm and thank him!!! Heil Hitler #bussdown",
+                       "To all the little girls watching...never doubt that you are valuable and powerful &amp; deserving of every chance &amp; opportunity in the world."]
     test_pred = vectorizer.transform(test_pred_tweet)
     pred_result = model.predict(test_pred)
     print("test = %s, Predicted = %s" % (test_pred, pred_result))

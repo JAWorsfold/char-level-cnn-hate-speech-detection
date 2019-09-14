@@ -104,7 +104,7 @@ if __name__ == '__main__':
     model, vectorizer = train_model('data/private/td_zw_labeled_data.csv')
 
     # pickle.dump(model, open("models/logreg.pickle", "wb"))
-    # pickle.dump(vectorizer, open("models/vectorizer.pickle", "wb"))
+    # pickle.dump(vectorizer, open("models/logreg_vectorizer.pickle", "wb"))
 
     test_pred_tweet = ["Listen up women, there is a reason why god made men stronger than you. It's because rape is a force of good, that should be celebrated. IF a man wants to fill you with his big cock, you should learn to : relax, orgasm and thank him!!! Heil Hitler #bussdown",
                        "To all the little girls watching...never doubt that you are valuable and powerful &amp; deserving of every chance &amp; opportunity in the world."]
