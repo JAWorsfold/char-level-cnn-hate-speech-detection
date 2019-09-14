@@ -98,7 +98,6 @@ def get_tweets(input_file, output_file):
     write_tweet_status(output_file, all_tweet_statuses)
 
 
-
 def get_tweets_bulk():
     """Retrieve tweet statuses in bulk and then write them to a file"""
     sub_tweet_ids_only = []  # empty array to store tweet ids

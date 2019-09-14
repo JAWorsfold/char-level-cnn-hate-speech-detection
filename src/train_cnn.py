@@ -189,9 +189,9 @@ def train_model(data, advanced=False):
 
 if __name__ == '__main__':
     # basic model trained
-    #cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
-    #cnn.save("models/cnn2.keras")
-    #pickle.dump(tokenizer, open("models/cnn2_tokenizer.pickle", "wb"))
+    # cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
+    # cnn.save("models/cnn2.keras")
+    # pickle.dump(tokenizer, open("models/cnn2_tokenizer.pickle", "wb"))
 
     # advanced model trained
     cnn_plus, tokenizer = train_model("data/private/td_zw_labeled_data.csv", advanced=True)

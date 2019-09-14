@@ -1,17 +1,19 @@
 """Using the command line, run this file to classify user input as a file or string"""
-import argparse
-import csv
+
 import warnings
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
     from src.train_cnn import *
     from keras import models
     from src.train_logreg import *
     from src.train_svm import *
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+    import pickle
+    import argparse
+    import csv
+    import os
+    import tensorflow as tf
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 
 pp = PreProcessUtils()
@@ -39,7 +41,7 @@ def load_basic_model(model_file, vectorizer_file):
     """Load the either the Logistic Regression or SVM model and vectorizer"""
     load_model = pickle.load(open(model_file, 'rb'))
     load_vectorizer = pickle.load(open(vectorizer_file, 'rb'))
-    print("Loading model complete...")
+    print(" ### Loading model complete ### ")
     return load_model, load_vectorizer
 
 
@@ -48,8 +50,9 @@ def load_cnn(type):
     """Load either the normal CNN or advanced CNN and tokenizer"""
     load_model = models.load_model("models/" + type + ".keras")
     load_tokenizer = pickle.load(open("models/" + type + "_tokenizer.pickle", 'rb'))
-    print("Loading model complete...")
+    print(" ### Loading model complete ### ")
     return load_model, load_tokenizer
+
 
 def write_results(write_path, final_predictions):
     """Write back the results to a csv file"""
@@ -72,7 +75,7 @@ def run_prediction(args):
             sample_tweets = pd.read_csv(sample)
         to_predict = sample_tweets['tweet']
         to_predict = to_predict.values.tolist()
-        print("File used for predictions: " + args.filepath)
+        print(" ### File used for predictions: " + args.filepath + " ### ")
 
     # try string
     if args.string is not None:
@@ -90,7 +93,7 @@ def run_prediction(args):
         else:
             for tweet in to_predict:
                 pp_to_predict.append(basic_preprocess(tweet))
-        print("Preprocessing complete...")
+        print(" ### Preprocessing complete ### ")
         to_predict_tok = tokenizer.texts_to_sequences(pp_to_predict)
         to_predict_tok = pad_sequences(to_predict_tok, maxlen=140, padding='post')
         to_predict_tok = np.array(to_predict_tok, dtype=np.float32)
@@ -105,7 +108,7 @@ def run_prediction(args):
                                              "models/" + args.model + "_vectorizer.pickle")
         for tweet in to_predict:
             pp_to_predict.append(basic_preprocess(tweet))
-        print("Preprocessing complete.")
+        print(" ### Preprocessing complete ### ")
         to_predict_vect = vectorizer.transform(pp_to_predict)
         results = model.predict(to_predict_vect)
         if args.model == 'logreg':
@@ -118,13 +121,16 @@ def run_prediction(args):
     else:
         raise Exception("The only available models are 'cnn+', 'cnn', 'svm', and 'logreg'.")
 
+    print(" ### START: Predictions and tweets ### ")
     for p in final_predictions:
         print(p)
+    print(" ### END: Predictions and tweets ### ")
 
     if args.write is not None:
         write_file_path = args.write + "/" + args.model + "_predictions.csv"
         written = write_results(write_file_path, final_predictions)
-        if written: print("Write back complete...")
+        if written:
+            print(" ### Write back complete ### ")
 
     return True
 
@@ -144,4 +150,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if run_prediction(args):
-        print("Program completed successfully.")
+        print(" ### Program completed successfully ### ")

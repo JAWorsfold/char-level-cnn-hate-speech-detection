@@ -5,8 +5,6 @@ Source: https://github.com/t-davidson/hate-speech-and-offensive-language"""
 import numpy as np
 import pandas as pd
 import pickle
-import matplotlib.pyplot as plot
-import seaborn as sns
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
@@ -94,16 +92,10 @@ def train_model(data):
 
     conf_matrix = confusion_matrix(y_test, y_pred)
     print(conf_matrix)
-        # names = ['Non-hate', 'Hate']
-        # df_cm = pd.DataFrame(conf_matrix, index=names, columns=names)
-        # plot.figure(figsize=(6,6))
-        # sns.heatmap(conf_matrix, annot=True, annot_kws={"size": 12}, cmap='gist_gray_r', square=True, fmt='.2f')
-        # plot.ylabel('Actual Class', fontsize=12)
-        # plot.xlabel('Predicted Class', fontsize=12)
-        # plot.show()
 
     # may want later for classification of my other tweets.
     return svm, vectorizer
+
 
 if __name__ == '__main__':
     # train_model('data/private/td_zw_labeled_data.csv')
@@ -112,8 +104,13 @@ if __name__ == '__main__':
     pickle.dump(model, open("models/svm.pickle", "wb"))
     pickle.dump(vectorizer, open("models/svm_vectorizer.pickle", "wb"))
 
-    test_pred_tweet = ["Listen up women, there is a reason why god made men stronger than you. It's because rape is a force of good, that should be celebrated. IF a man wants to fill you with his big cock, you should learn to : relax, orgasm and thank him!!! Heil Hitler #bussdown",
-                       "To all the little girls watching...never doubt that you are valuable and powerful &amp; deserving of every chance &amp; opportunity in the world."]
+    test_pred_tweet = ["Listen up women, there is a reason why god made men stronger than you. It's "
+                       "because rape is a force of good, that should be celebrated. IF a man wants to "
+                       "fill you with his big cock, you should learn to : relax, orgasm and thank him!!! "
+                       "Heil Hitler #bussdown",
+                       "To all the little girls watching...never doubt that you are valuable and powerful "
+                       "&amp; deserving of every chance &amp; opportunity in the world."]
+
     test_pred = vectorizer.transform(test_pred_tweet)
     pred_result = model.predict(test_pred)
     print("test = %s, Predicted = %s" % (test_pred, pred_result))
