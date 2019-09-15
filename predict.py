@@ -33,7 +33,8 @@ def advanced_preprocess(tweet):
     """Use the advanced preprecessing steps to preprocess the tweets"""
     pp_tweet = tweet
     pp_tweet = pp.remove_noise(pp_tweet, mentions=False, replacement='')
-    pp_tweet = pp.normalise(pp_tweet, punctuation=False, numbers=False, stopwords=False, stem_words=False, replacement='')
+    pp_tweet = pp.normalise(pp_tweet, punctuation=False, numbers=False, stopwords=False, stem_words=False,
+                            replacement='')
     return pp_tweet
 
 

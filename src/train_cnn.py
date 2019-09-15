@@ -97,8 +97,8 @@ def train_model(data, advanced=False):
 
     # over sampling
     X = pd.concat([X_train, y_train], axis=1)
-    not_hate = X[X['class']==0]
-    hate = X[X['class']==1]
+    not_hate = X[X['class'] == 0]
+    hate = X[X['class'] == 1]
     hate = resample(hate, replace=True, n_samples=len(not_hate), random_state=33)
     X = pd.concat([not_hate, hate])
     X_train = X['tweet']
@@ -147,7 +147,7 @@ def train_model(data, advanced=False):
     model.add(Embedding(vocab_size + 1, embedding_size, input_length=max_len, weights=[embeddings]))
 
     # convolution and pooling layers
-    model.add(Conv1D(256, 7, activation='relu', input_shape=(max_len,), input_dtype=np.int64))
+    model.add(Conv1D(256, 7, activation='relu', input_shape=(max_len,), input_dtype=np.float32))
     model.add(MaxPooling1D(3))
     model.add(Conv1D(256, 7, activation='relu'))
     model.add(MaxPooling1D(3))
@@ -160,9 +160,9 @@ def train_model(data, advanced=False):
 
     # fully connected layer
     model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
     model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.2))
 
     # output layer
     model.add(Dense(1, activation='sigmoid'))
@@ -190,8 +190,8 @@ def train_model(data, advanced=False):
 if __name__ == '__main__':
     # basic model trained
     # cnn, tokenizer = train_model("data/private/td_zw_labeled_data.csv")
-    # cnn.save("models/cnn2.keras")
-    # pickle.dump(tokenizer, open("models/cnn2_tokenizer.pickle", "wb"))
+    # cnn.save("models/cnn.keras")
+    # pickle.dump(tokenizer, open("models/cnn_tokenizer.pickle", "wb"))
 
     # advanced model trained
     cnn_plus, tokenizer = train_model("data/private/td_zw_labeled_data.csv", advanced=True)
