@@ -24,7 +24,7 @@ Launch predict.py with the following arguments:
 Example usage:
 
 ```bash
-python predict.py -s "I hate handicap f*ggots" -m "cnn+" -w "data/private"
+python predict.py -s "I hate handicap f*ggots" -m cnn+ -w data/private
 
 ```
 
