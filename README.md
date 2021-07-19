@@ -12,6 +12,9 @@ capability of Character-level Convolutional Neural Networks (CNN) for hate speec
 to retain a high level of detection accuracy, even for adversarial content, in part due to improved adversarial 
 training.
 
+## Full paper available to read here:
+https://github.com/JAWorsfold/char-level-cnn-hate-speech-detection/blob/master/Project_Report_Char_CNN_Hate_Speech_Detection.pdf
+
 ## How to use the code
 
 Launch predict.py with the following arguments:
